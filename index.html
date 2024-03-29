@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="./img/favicon.png">
+    <title>El juego de la Oca || El juego de mesa pero Online</title>
+</head>
+
+<body>
+    <header>
+        <audio id="sfx-roll-dice" src="./sfx/tirar-dado.mp3"></audio>
+        <audio id="sfx-goose-dancing" src="./sfx/goose-dancing.mp3"></audio>
+    </header>
+    <section class="container">
+        <img class="logo" src="./img/logo-oca.png" alt="Logo Oca">
+        <div class="game">
+            <p class="select-players">Selecciona jugadores</p>
+            <form class="form-players" id="form-jugadores">
+                <select name="jugadores" id="jugadores">
+                    <option value="2">2 Jugadores</option>
+                    <option value="3">3 Jugadores</option>
+                    <option value="4">4 Jugadores</option>
+                </select>
+                <input type="submit" value="Jugar">
+            </form>
+            <div id="board">
+            </div>
+            <div id="roll-dice">
+                <button class="roll-dice-btn">
+                    Tirar Dado
+                </button>
+                <div id="dice">
+                    <img src="./img/dado.gif" alt="Dado" id="dice-img">
+                </div>
+            </div>
+            <div id="game-ended">
+                <div id="box-winners">
+                    <p id="winner-text">Partida finalizada:</p>
+                    <div id="winners"></div>
+                    <button class="restart-game">
+                        Volver a jugar
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+        <div id="board-footer">
+            <div id="player-turn-div">
+                <p id="turn-text">Turno del jugador:</p>
+                <div id="player-turn"></div>
+            </div>
+            <button class="restart-game">
+                Reiniciar Juego
+            </button>
+        </div>
+    </section>
+    <footer>
+        <p>With love ❤ by Martin Fusalario</p>
+        <img id="oca-bailona" src="./img/goose.gif" alt="Oca Bailona">
+    </footer>
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/board.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/game.js"></script>
+</body>
+
+</html>
