@@ -61,7 +61,7 @@ $(document).ready(function () {
 				updatePlayerPosition(board.turn - 1, dice);
 				nextPlayer();
 				resolve();
-			}, 10);
+			}, 1000);
 		});
 
 		sfxDice.pause();
