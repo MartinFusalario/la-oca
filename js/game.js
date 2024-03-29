@@ -57,12 +57,11 @@ $(document).ready(function () {
 
 		await new Promise(resolve => {
 			setTimeout(() => {
-				dice = players[board.turn - 1].move();
-				console.log('Dado:', dice);
-				updatePlayerPosition(board.turn - 1);
+				dice = players[board.turn - 1].rollDice();
+				updatePlayerPosition(board.turn - 1, dice);
 				nextPlayer();
 				resolve();
-			}, 1000);
+			}, 10);
 		});
 
 		sfxDice.pause();
@@ -84,35 +83,43 @@ $(document).ready(function () {
 		$('.roll-dice-btn').removeClass('roll-dice-btn');
 	}
 
-	function updatePlayerPosition(playerIndex) {
+	function updatePlayerPosition(playerIndex, dice) {
 		const player = players[playerIndex];
-		const posBoard = player.getBoardPosition();
 
-		let posX = BOARD[posBoard - 1].posX;
-		let posY = BOARD[posBoard - 1].posY;
+		for (let i = 0; i < dice; i++) {
+			let posBoard = player.getBoardPosition();
+			if (posBoard >= 60) {
+				return;
+			}
+			let posX = BOARD[posBoard].posX;
+			let posY = BOARD[posBoard].posY;
 
-		switch (player.id) {
-			case 1:
-				posX += 0;
-				break;
-			case 2:
-				posX += 5;
-				break;
-			case 3:
-				posX += 8;
-				break;
-			case 4:
-				posX += 10;
-				break;
+			switch (player.id) {
+				case 1:
+					posX += 0;
+					break;
+				case 2:
+					posX += 5;
+					break;
+				case 3:
+					posX += 8;
+					break;
+				case 4:
+					posX += 10;
+					break;
+			}
+
+			$(`#player${playerIndex + 1}`).animate(
+				{
+					left: posX + 'px',
+					bottom: posY + 'px',
+				},
+				400
+			);
+			player.setBoardPosition(posBoard + 1);
 		}
 
-		$(`#player${playerIndex + 1}`).animate(
-			{
-				left: posX + 'px',
-				bottom: posY + 'px',
-			},
-			500
-		); // 500 milisegundos de duración de la animación
+		console.log(players[board.turn - 1]);
 	}
 
 	function nextPlayer() {
@@ -121,7 +128,6 @@ $(document).ready(function () {
 			changeTurnImage();
 		} else {
 			board.turn++;
-			console.log('Turno del jugador', board.turn);
 			changeTurnImage();
 		}
 

@@ -4,35 +4,28 @@ class Player {
 		this.boardPosition = 1;
 		this.finish = false;
 	}
-	move() {
+	rollDice() {
 		if (this.finish) {
-			console.log(`El jugador ${this.id} ya ha finalizado la partida`);
 			return;
 		}
-		const dice = this.rollDice();
+		const dice = Math.floor(Math.random() * 6) + 1;
 		console.log(`El jugador ${this.id} ha sacado un ${dice}`);
-		this.setBoardPosition(dice);
 		return dice;
 	}
-	rollDice() {
-		return Math.floor(Math.random() * 6) + 1;
-	}
-	setBoardPosition(dice) {
-		if (this.boardPosition + dice >= 60) {
+	setBoardPosition(position) {
+		this.boardPosition = position;
+		if (this.boardPosition >= 60) {
 			this.setFinish();
 			this.boardPosition = 60;
+			console.log(`El jugador ${this.id} ha finalizado la partida`);
 			return;
 		}
-		this.boardPosition += dice;
 	}
 	resetPosition() {
 		this.boardPosition = 0;
 	}
 	getBoardPosition() {
 		return this.boardPosition;
-	}
-	getId() {
-		return this.id;
 	}
 	setFinish() {
 		this.finish = true;
