@@ -87,8 +87,7 @@ $(document).ready(function () {
 		if (!board.gameStarted) return;
 		// if (board.rollAgain) return;
 
-		sfxDice.pause();
-		sfxDice.currentTime = 0;
+		restartSfxDice();
 
 		// Mostramos el número del dado que ha salido
 		$('#dice-img').attr('src', `./img/dado${dice}.png`);
@@ -382,6 +381,8 @@ $(document).ready(function () {
 		$('#board-footer').css('display', 'flex');
 		$('#dice').hide();
 		$('#player-turn').empty();
+		enableRollDice();
+		restartSfxDice();
 
 		resetPosition();
 
@@ -402,6 +403,11 @@ $(document).ready(function () {
 			$(`#player${player.id}`).removeAttr('style').show();
 			player.finish = false;
 		});
+	}
+
+	function restartSfxDice() {
+		$('#sfx-roll-dice').trigger('pause');
+		$('#sfx-roll-dice').prop('currentTime', 0);
 	}
 
 	// Al finalizar el sonido de lanzar el dado, paramos el audio y lo reiniciamos
