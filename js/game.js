@@ -420,6 +420,9 @@ $(document).ready(function () {
 	// Easter Egg de la Oca Bailona al hacer click en la imagen
 	$('#oca-bailona').click(function () {
 		$('#sfx-goose-dancing')[0].play();
+		$('#message').text(
+			'¡La Oca Bailona ha llegado a la fiesta! 🕺 Easter Egg Descubierto 😄'
+		);
 	});
 
 	// Al finalizar la canción de la Oca Bailona, paramos el audio y lo reiniciamos
