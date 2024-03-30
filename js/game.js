@@ -334,6 +334,7 @@ $(document).ready(function () {
 				);
 				$('#winners').append($('<li>').text(`Posición: `).append($img));
 			});
+			$('message').text('Fin de la partida');
 			return true;
 		}
 	}
@@ -361,6 +362,9 @@ $(document).ready(function () {
 		board.turn = 1;
 		players = [];
 		winners = [];
+		$('#message').text(
+			'Hola! , selecciona la cantidad de jugadores y comienza a jugar'
+		);
 
 		console.log(players);
 	});
@@ -386,6 +390,7 @@ $(document).ready(function () {
 		board.turn = 1;
 		changeTurnImage();
 		winners = [];
+		$('#message').text('¡Que empiece el juego!');
 
 		console.log(players);
 	});
