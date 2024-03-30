@@ -6,7 +6,7 @@ $(document).ready(function () {
 	};
 
 	$('#form-jugadores').submit(function (event) {
-		event.preventDefault(); // Prevenir el envío del formulario por defecto
+		event.preventDefault(); // Prevenir el envío del formulario por defecto para evitar recargar la página
 
 		// Obtener el valor seleccionado por el usuario
 		const qtyPlayers = $('#jugadores').val();
@@ -15,7 +15,9 @@ $(document).ready(function () {
 		startGame(qtyPlayers);
 	});
 
+	// Función para iniciar el juego
 	function startGame(qtyPlayers) {
+		// Creamos a los jugadores y los añadimos al array de jugadores según la cantidad seleccionada
 		for (let i = 0; i < qtyPlayers; i++) {
 			let id = i + 1;
 			players.push(new Player(id));
@@ -43,6 +45,7 @@ $(document).ready(function () {
 		}
 	}
 
+	// Evento para lanzar el dado
 	$('.roll-dice-btn').click(async function () {
 		console.log('Girando Dado...');
 		let dice = 1;
@@ -57,8 +60,11 @@ $(document).ready(function () {
 
 		await new Promise(resolve => {
 			setTimeout(() => {
+				// Simulamos el lanzamiento del dado
 				dice = players[board.turn - 1].rollDice();
+				// Actualizamos la posición del jugador en el tablero
 				updatePlayerPosition(board.turn - 1, dice);
+				// Pasamos al siguiente jugador
 				nextPlayer();
 				resolve();
 			}, 1000);
@@ -67,33 +73,46 @@ $(document).ready(function () {
 		sfxDice.pause();
 		sfxDice.currentTime = 0;
 
+		// Mostramos el número del dado que ha salido
 		$('#dice-img').attr('src', `./img/dado${dice}.png`);
+		// Habilitamos el botón de lanzar dado
 		enableRollDice();
 	});
 
+	// Función para habilitar el botón de lanzar dado
 	function enableRollDice() {
 		$('.roll-dice-btn-disabled').addClass('roll-dice-btn');
 		$('.roll-dice-btn-disabled').removeClass('roll-dice-btn-disabled');
 		$('.roll-dice-btn').prop('disabled', false);
 	}
 
+	// Función para deshabilitar el botón de lanzar dado
 	function disableRollDice() {
 		$('.roll-dice-btn').prop('disabled', true);
 		$('.roll-dice-btn').addClass('roll-dice-btn-disabled');
 		$('.roll-dice-btn').removeClass('roll-dice-btn');
 	}
 
+	// Función para actualizar la posición de los jugadores en el tablero
 	function updatePlayerPosition(playerIndex, dice) {
+		// Obtenemos el jugador actual
 		const player = players[playerIndex];
 
+		// Realizamos un bucle para mover al jugador tantas casillas como indique el dado, una casilla por iteración
 		for (let i = 0; i < dice; i++) {
+			// Obtenemos la posición actual del jugador en el tablero
 			let posBoard = player.getBoardPosition();
+
+			// Si el jugador ha llegado a la casilla 60, ha finalizado la partida
 			if (posBoard >= 60) {
 				return;
 			}
+
+			// Obtenemos las coordenadas de la siguiente casilla
 			let posX = BOARD[posBoard].posX;
 			let posY = BOARD[posBoard].posY;
 
+			// Para que no se solapen los jugadores, movemos a los jugadores a la derecha de la casilla según su id
 			switch (player.id) {
 				case 1:
 					posX += 0;
@@ -109,6 +128,7 @@ $(document).ready(function () {
 					break;
 			}
 
+			// Movemos al jugador a la siguiente casilla en el tablero
 			$(`#player${playerIndex + 1}`).animate(
 				{
 					left: posX + 'px',
@@ -116,12 +136,14 @@ $(document).ready(function () {
 				},
 				400
 			);
+			// Actualizamos la posición del jugador en el tablero
 			player.setBoardPosition(posBoard + 1);
 		}
 
 		console.log(players[board.turn - 1]);
 	}
 
+	// Función para pasar al siguiente jugador
 	function nextPlayer() {
 		if (board.turn === players.length) {
 			board.turn = 1;
@@ -131,6 +153,7 @@ $(document).ready(function () {
 			changeTurnImage();
 		}
 
+		// Comprobamos si todos los jugadores han terminado la partida
 		if (checkEnd()) return;
 
 		// Si el jugador actual ya ha terminado, pasamos al siguiente jugador de forma recursiva
@@ -139,12 +162,14 @@ $(document).ready(function () {
 		}
 	}
 
+	// Función para cambiar la imagen del jugador al que le toca jugar
 	function changeTurnImage() {
 		$('#player-turn')
 			.empty()
 			.append($('<img>').attr('src', `./img/player${board.turn}.png`));
 	}
 
+	// Función para comprobar si todos los jugadores han terminado la partida e ir metiéndolos en el array de ganadores en orden según terminen
 	function checkEnd() {
 		let finishPlayers = 0;
 		players.forEach(player => {
@@ -156,6 +181,7 @@ $(document).ready(function () {
 			}
 		});
 
+		// Si todos los jugadores han terminado, mostramos el mensaje de fin de partida y el modal con los ganadores
 		if (finishPlayers === players.length) {
 			console.log('Todos los jugadores han terminado');
 
@@ -174,6 +200,7 @@ $(document).ready(function () {
 		}
 	}
 
+	// Reiniciar la partida actual volviendo a seleccionar el número de jugadores
 	$('.restart-game').click(function () {
 		$(':animated').stop(true, true);
 		$('#game-ended').hide();
@@ -196,15 +223,48 @@ $(document).ready(function () {
 		console.log(players);
 	});
 
+	// Reiniciar la partida actual sin volver a seleccionar el número de jugadores
+	$('.restart-actual-game').click(function () {
+		$(':animated').stop(true, true);
+		$('#game-ended').hide();
+		$('#board, #roll-dice, .roll-dice-btn').show();
+		$('#roll-dice').css('display', 'flex');
+		$('#board-footer').css('display', 'flex');
+		$('#dice').hide();
+		$('#player-turn').empty();
+
+		resetPosition();
+
+		$('#winners').empty();
+
+		board.turn = 1;
+		changeTurnImage();
+		winners = [];
+
+		console.log(players);
+	});
+
+	// Función para reiniciar la posición de los jugadores en el tablero
+	function resetPosition() {
+		players.forEach(player => {
+			player.resetPosition();
+			$(`#player${player.id}`).removeAttr('style').show();
+			player.finish = false;
+		});
+	}
+
+	// Al finalizar el sonido de lanzar el dado, paramos el audio y lo reiniciamos
 	$('#sfx-roll-dice').on('ended', function () {
 		$('#sfx-roll-dice').trigger('pause');
 		$('#sfx-roll-dice').prop('currentTime', 0);
 	});
 
+	// Easter Egg de la Oca Bailona al hacer click en la imagen
 	$('#oca-bailona').click(function () {
 		$('#sfx-goose-dancing')[0].play();
 	});
 
+	// Al finalizar la canción de la Oca Bailona, paramos el audio y lo reiniciamos
 	$('#oca-bailona').on('ended', function () {
 		$('#sfx-goose-dancing').trigger('pause');
 		$('#sfx-goose-dancing').prop('currentTime', 0);

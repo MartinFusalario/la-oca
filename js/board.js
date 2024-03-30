@@ -1,3 +1,4 @@
+// Tablero con las posiciones de las casillas
 const BOARD = [
 	{
 		id: 1,
