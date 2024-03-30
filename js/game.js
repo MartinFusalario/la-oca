@@ -1,8 +1,13 @@
 $(document).ready(function () {
 	let players = [];
 	let winners = [];
+
 	const board = {
 		turn: 1,
+		gameStarted: false,
+		rollAgain: false,
+		specialMove: false,
+		gameEnded: false,
 	};
 
 	$('#form-jugadores').submit(function (event) {
@@ -17,6 +22,9 @@ $(document).ready(function () {
 
 	// Función para iniciar el juego
 	function startGame(qtyPlayers) {
+		board.gameStarted = true;
+
+		$('#message').text('¡Que empiece el juego!');
 		// Creamos a los jugadores y los añadimos al array de jugadores según la cantidad seleccionada
 		for (let i = 0; i < qtyPlayers; i++) {
 			let id = i + 1;
@@ -47,6 +55,13 @@ $(document).ready(function () {
 
 	// Evento para lanzar el dado
 	$('.roll-dice-btn').click(async function () {
+		// Al haber reiniciado la partida, cuando se lanza por primera vez el dado, se inicia la partida
+		board.gameStarted = true;
+		board.rollAgain = false;
+		board.specialMove = false;
+
+		$('#message').text('Turno del siguiente jugador');
+
 		console.log('Girando Dado...');
 		let dice = 1;
 		const sfxDice = $('#sfx-roll-dice')[0];
@@ -64,11 +79,13 @@ $(document).ready(function () {
 				dice = players[board.turn - 1].rollDice();
 				// Actualizamos la posición del jugador en el tablero
 				updatePlayerPosition(board.turn - 1, dice);
-				// Pasamos al siguiente jugador
-				nextPlayer();
 				resolve();
 			}, 1000);
 		});
+
+		// Si se ha reinitiado la partida, no continuamos
+		if (!board.gameStarted) return;
+		// if (board.rollAgain) return;
 
 		sfxDice.pause();
 		sfxDice.currentTime = 0;
@@ -77,6 +94,22 @@ $(document).ready(function () {
 		$('#dice-img').attr('src', `./img/dado${dice}.png`);
 		// Habilitamos el botón de lanzar dado
 		enableRollDice();
+
+		// Si el jugador ha sacado un 6, vuelve a lanzar el dado
+		if (dice === 6 && players[board.turn - 1].finish === false) {
+			board.rollAgain = true;
+			$('#message').text('Un 6 ¡Vuelve a lanzar el dado!');
+			return;
+		}
+
+		if (board.rollAgain && players[board.turn - 1].finish === false) {
+			board.rollAgain = false;
+			return;
+		}
+
+		if (board.gameEnded) return;
+		// Pasamos al siguiente jugador
+		nextPlayer();
 	});
 
 	// Función para habilitar el botón de lanzar dado
@@ -94,12 +127,13 @@ $(document).ready(function () {
 	}
 
 	// Función para actualizar la posición de los jugadores en el tablero
-	function updatePlayerPosition(playerIndex, dice) {
+	function updatePlayerPosition(playerIndex, moves) {
+		if (!board.gameStarted) return;
 		// Obtenemos el jugador actual
 		const player = players[playerIndex];
 
 		// Realizamos un bucle para mover al jugador tantas casillas como indique el dado, una casilla por iteración
-		for (let i = 0; i < dice; i++) {
+		for (let i = 0; i < moves; i++) {
 			// Obtenemos la posición actual del jugador en el tablero
 			let posBoard = player.getBoardPosition();
 
@@ -138,9 +172,110 @@ $(document).ready(function () {
 			);
 			// Actualizamos la posición del jugador en el tablero
 			player.setBoardPosition(posBoard + 1);
+			if (checkEnd()) return;
 		}
+		// Comprobamos si todos los jugadores han terminado la partida
+
+		checkSpecialPosition(playerIndex);
 
 		console.log(players[board.turn - 1]);
+	}
+
+	function checkSpecialPosition(playerIndex) {
+		const player = players[playerIndex];
+		const posBoard = player.getBoardPosition();
+
+		// Comprobamos si el jugador ha caído en una casilla especial
+		switch (posBoard) {
+			case 6:
+				// Puente
+				if (board.specialMove) {
+					board.specialMove = false;
+					return;
+				}
+				$('#message').text(
+					'Puente: Avanza hasta la casilla 12, turno del siguiente jugador'
+				);
+				board.specialMove = true;
+				player.setBoardPosition(12);
+				$(`#player${playerIndex + 1}`).animate(
+					{
+						left: 560,
+						bottom: 220,
+					},
+					400
+				);
+				break;
+			case 12:
+				// Puente
+				if (board.specialMove) {
+					board.specialMove = false;
+					return;
+				}
+				$('#message').text(
+					'Puente: Retrocede hasta la casilla 6, turno del siguiente jugador'
+				);
+				player.setBoardPosition(6);
+				$(`#player${playerIndex + 1}`).animate(
+					{
+						left: 360,
+						bottom: 10,
+					},
+					400
+				);
+				break;
+			case 14:
+				// Oca
+				if (board.specialMove) {
+					board.specialMove = false;
+					return;
+				}
+				$('#message').text('De oca a oca y tiro porque me toca');
+				board.specialMove = true;
+				player.setBoardPosition(26);
+				$(`#player${playerIndex + 1}`).animate(
+					{
+						left: 20,
+						bottom: 220,
+					},
+					400
+				);
+				board.rollAgain = true;
+				break;
+
+			case 26:
+				// Oca
+				if (board.specialMove) {
+					board.specialMove = false;
+					return;
+				}
+				$('#message').text('De oca a oca y tiro porque me toca');
+				player.setBoardPosition(14);
+				board.specialMove = true;
+				$(`#player${playerIndex + 1}`).animate(
+					{
+						left: 560,
+						bottom: 360,
+					},
+					400
+				);
+				board.rollAgain = true;
+				break;
+			case 58:
+				// Calavera
+				$('#message').text(
+					'Calavera: Retrocede hasta la casilla 1, turno del siguiente jugador'
+				);
+				player.setBoardPosition(1);
+				$(`#player${playerIndex + 1}`).animate(
+					{
+						left: '0px',
+						bottom: '0px',
+					},
+					400
+				);
+				break;
+		}
 	}
 
 	// Función para pasar al siguiente jugador
@@ -171,6 +306,8 @@ $(document).ready(function () {
 
 	// Función para comprobar si todos los jugadores han terminado la partida e ir metiéndolos en el array de ganadores en orden según terminen
 	function checkEnd() {
+		if (board.gameEnded) return;
+
 		let finishPlayers = 0;
 		players.forEach(player => {
 			if (player.finish) {
@@ -184,6 +321,7 @@ $(document).ready(function () {
 		// Si todos los jugadores han terminado, mostramos el mensaje de fin de partida y el modal con los ganadores
 		if (finishPlayers === players.length) {
 			console.log('Todos los jugadores han terminado');
+			board.gameEnded = true;
 
 			$('#roll-dice').hide();
 			$('#board-footer').hide();
@@ -216,6 +354,10 @@ $(document).ready(function () {
 
 		$('#winners').empty();
 
+		board.gameStarted = false;
+		board.rollAgain = false;
+		board.specialMove = false;
+		board.gameEnded = false;
 		board.turn = 1;
 		players = [];
 		winners = [];
@@ -225,6 +367,10 @@ $(document).ready(function () {
 
 	// Reiniciar la partida actual sin volver a seleccionar el número de jugadores
 	$('.restart-actual-game').click(function () {
+		board.gameStarted = false;
+		board.rollAgain = false;
+		board.specialMove = false;
+		board.gameEnded = false;
 		$(':animated').stop(true, true);
 		$('#game-ended').hide();
 		$('#board, #roll-dice, .roll-dice-btn').show();
