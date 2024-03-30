@@ -405,6 +405,7 @@ $(document).ready(function () {
 		});
 	}
 
+	// Función para reiniciar el audio de lanzar el dado
 	function restartSfxDice() {
 		$('#sfx-roll-dice').trigger('pause');
 		$('#sfx-roll-dice').prop('currentTime', 0);
